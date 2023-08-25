@@ -1,17 +1,3 @@
-/* use esp_idf_sys as _; // If using the `binstart` feature of `esp-idf-sys`, always keep this module imported
-use log::*;
-
-fn main() {
-    // It is necessary to call this function once. Otherwise some patches to the runtime
-    // implemented by esp-idf-sys might not link properly. See https://github.com/esp-rs/esp-idf-template/issues/71
-    esp_idf_sys::link_patches();
-    // Bind the log crate to the ESP Logging facilities
-    esp_idf_svc::log::EspLogger::initialize_default();
-
-    info!("Hello, world!");
-}
- */
-
 use anyhow::Result;
 use core::str;
 use embedded_svc::{http::Method, io::Write};
@@ -61,20 +47,6 @@ fn main() -> Result<()> {
 
     info!("Wifi configured!!!");
 
-    // Initialize temperature sensor
-    // let sda = peripherals.pins.gpio10;
-    // let scl = peripherals.pins.gpio8;
-    // let i2c = peripherals.i2c0;
-    // let config = I2cConfig::new().baudrate(100.kHz().into());
-    // let i2c = I2cDriver::new(i2c, sda, scl, &config)?;
-    // let temp_sensor_main = Arc::new(Mutex::new(shtc3(i2c)));
-    // let temp_sensor = temp_sensor_main.clone();
-    // temp_sensor
-    //     .lock()
-    //     .unwrap()
-    //     .start_measurement(PowerMode::NormalMode)
-    //     .unwrap();
-
     // Set the HTTP server
     let mut server = EspHttpServer::new(&Configuration::default())?;
     // http://<sta ip>/ handler
@@ -89,13 +61,6 @@ fn main() -> Result<()> {
 
     // http://<sta ip>/temperature handler
     server.fn_handler("/temperature", Method::Get, move |request| {
-        // let temp_val = temp_sensor
-        //     .lock()
-        //     .unwrap()
-        //     .get_measurement_result()
-        //     .unwrap()
-        //     .temperature
-        //     .as_degrees_celsius();
         let html = temperature(36.6);
         let mut response = request.into_ok_response()?;
         response.write_all(html.as_bytes())?;
@@ -106,11 +71,6 @@ fn main() -> Result<()> {
 
     // Prevent program from exiting
     loop {
-        // temp_sensor_main
-        //     .lock()
-        //     .unwrap()
-        //     .start_measurement(PowerMode::NormalMode)
-        //     .unwrap();
         sleep(Duration::from_millis(1000));
     }
 }
